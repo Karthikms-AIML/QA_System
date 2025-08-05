@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AI Question Answering</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    body {
+      margin: 0;
+      background: linear-gradient(to right, #1e1e2f, #2a2a40);
+      color: #fff;
+      display: flex;
+      height: 100vh;
+      justify-content: center;
+      align-items: center;
+    }
+    .container {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 16px;
+      padding: 30px;
+      width: 500px;
+      backdrop-filter: blur(15px);
+      box-shadow: 0 0 25px rgba(0,0,0,0.4);
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #00f0ff;
+    }
+    textarea, input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      margin-bottom: 15px;
+      font-size: 15px;
+    }
+    textarea {
+      height: 100px;
+    }
+    button {
+      padding: 10px 20px;
+      border: none;
+      margin: 5px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    #getBtn {
+      background: linear-gradient(90deg, #00dbde, #fc00ff);
+      color: white;
+    }
+    #resetBtn {
+      background: linear-gradient(90deg, #2193b0, #6dd5ed);
+      color: white;
+    }
+    .output {
+      margin-top: 15px;
+      padding: 15px;
+      background-color: rgba(0,0,0,0.2);
+      border-radius: 10px;
+    }
+    .highlight {
+      color: #00ffae;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧠 AI Question Answering</h1>
+    <textarea id="context" placeholder="Enter paragraph/context here..."></textarea>
+    <input type="text" id="question" placeholder="Enter your question..."/>
+    <div style="text-align: center;">
+      <button id="getBtn" onclick="getAnswer()">Get Answer</button>
+      <button id="resetBtn" onclick="resetForm()">Reset</button>
+    </div>
+    <div class="output" id="answer-output"></div>
+  </div>
+
+  <script>
+    async function getAnswer() {
+      const context = document.getElementById("context").value;
+      const question = document.getElementById("question").value;
+      const output = document.getElementById("answer-output");
+
+      if (!context || !question) {
+        output.innerHTML = "<span class='highlight'>Please enter both context and question.</span>";
+        return;
+      }
+
+      output.innerHTML = "⏳ Getting answer...";
+
+      try {
+        const response = await fetch("http://127.0.0.1:8000/predict", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ context, question })
+        });
+
+        const data = await response.json();
+        if (data.answer) {
+          output.innerHTML = `✅ <span class="highlight">Answer:</span> ${data.answer}`;
+        } else {
+          output.innerHTML = `<span class="highlight">❌ Server Error: ${data.error || "Please try again."}</span>`;
+        }
+      } catch (err) {
+        output.innerHTML = "<span class='highlight'>❌ Network error. Backend might be off.</span>";
+      }
+    }
+
+    function resetForm() {
+      document.getElementById("context").value = "";
+      document.getElementById("question").value = "";
+      document.getElementById("answer-output").innerHTML = "";
+    }
+  </script>
+</body>
+</html>
